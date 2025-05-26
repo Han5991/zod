@@ -426,7 +426,11 @@ export const $ZodURL: core.$constructor<$ZodURL> = /*@__PURE__*/ core.$construct
     try {
       const url = new URL(payload.value);
 
-      if (def.hostname) {
+      // Special handling for protocols that can have empty hostnames (like file:// and data:)
+      const protocolsWithEmptyHostname = ["file:", "data:"];
+      const hasEmptyHostnameProtocol = protocolsWithEmptyHostname.some((p) => url.protocol.startsWith(p));
+
+      if (def.hostname && !(hasEmptyHostnameProtocol && url.hostname === "")) {
         def.hostname.lastIndex = 0;
         if (!def.hostname.test(url.hostname)) {
           payload.issues.push({
